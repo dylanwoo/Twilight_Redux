@@ -18,6 +18,8 @@ Classic mode recreates the original orange-to-blue-to-black gradient,
 deterministic point stars, SGI cross stars, and high-DPI diamond stars. Palette,
 horizon, star counts, star shape, seed, and soft twinkle remain adjustable.
 
+[![Classic Twilight with the original SGI-inspired gradient, cross stars, and wallpaper controls](docs/twilight-preview.jpg)](https://sgi-twilight-studio.dylanwoo757047.chatgpt.site)
+
 ### Twilight (Enhanced)
 
 Enhanced mode extends the same controls into a living nightscape:
