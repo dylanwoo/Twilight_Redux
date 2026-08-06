@@ -52,6 +52,7 @@ type SkySettings = {
 type Rgb = { r: number; g: number; b: number };
 
 const TWINKLE_FRAME_INTERVAL = 1000 / 30;
+const DIAGONAL_CROSS_ROTATION = Math.PI / 4;
 
 const DEFAULTS = {
   palette: "authentic" as PaletteKey,
@@ -112,24 +113,28 @@ function getTwinkleOpacity(
 
   const salt = bright ? 0x6d2b79f5 : 0x1b873593;
   const selector = hashUnit(seed, index, salt);
-  const twinkleShare = bright ? 0.78 : 0.28 + horizonInfluence * 0.12;
+  const twinkleShare = bright ? 0.96 : 0.38 + horizonInfluence * 0.22;
   if (selector > twinkleShare) return 1;
 
   // Atmospheric scintillation is irregular rather than a uniform pulse. Two
-  // slow deterministic waves keep the sky calm without synchronized stars.
+  // deterministic waves keep the sky calm without synchronized stars.
   const phase = hashUnit(seed, index, salt ^ 0x85ebca6b) * Math.PI * 2;
   const secondaryPhase = hashUnit(seed, index, salt ^ 0xc2b2ae35) * Math.PI * 2;
   const cyclesPerSecond =
-    0.28 + hashUnit(seed, index, salt ^ 0x27d4eb2f) * 0.72;
+    0.42 + hashUnit(seed, index, salt ^ 0x27d4eb2f) * 1.18;
   const primary = Math.sin(timeSeconds * cyclesPerSecond * Math.PI * 2 + phase);
   const secondary = Math.sin(
     timeSeconds * cyclesPerSecond * 1.73 * Math.PI * 2 + secondaryPhase,
   );
-  const shimmer = primary * 0.68 + secondary * 0.32;
-  const normalizedShimmer = (shimmer + 1) / 2;
-  const atmosphericDepth = (bright ? 0.5 : 0.34) *
-    (0.6 + horizonInfluence * 0.4);
-  return 1 - atmosphericDepth + normalizedShimmer * atmosphericDepth;
+  const shimmer = primary * 0.62 + secondary * 0.38;
+  const normalizedShimmer = Math.pow((shimmer + 1) / 2, 1.35);
+  const atmosphericDepth = (bright ? 0.78 : 0.5) *
+    (0.62 + horizonInfluence * 0.38);
+  return clamp(
+    1 - atmosphericDepth + normalizedShimmer * atmosphericDepth,
+    bright ? 0.2 : 0.38,
+    1,
+  );
 }
 
 function getStarColor(
@@ -171,6 +176,31 @@ function drawDiamond(
     );
     context.fillRect(x - halfWidth, y + offset, halfWidth * 2 + 1, 1);
   }
+}
+
+function drawCross(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  rotation: number,
+) {
+  const length = size * 3;
+  const offset = Math.floor(length / 2);
+  const thicknessOffset = Math.floor(size / 2);
+
+  if (rotation === 0) {
+    context.fillRect(x - offset, y - thicknessOffset, length, size);
+    context.fillRect(x - thicknessOffset, y - offset, size, length);
+    return;
+  }
+
+  context.save();
+  context.translate(x, y);
+  context.rotate(rotation);
+  context.fillRect(-offset, -thicknessOffset, length, size);
+  context.fillRect(-thicknessOffset, -offset, size, length);
+  context.restore();
 }
 
 function drawSky(
@@ -245,11 +275,9 @@ function drawSky(
     if (settings.starShape === "diamond") {
       drawDiamond(context, x, y, size);
     } else {
-      const length = size * 3;
-      const offset = Math.floor(length / 2);
-      const thicknessOffset = Math.floor(size / 2);
-      context.fillRect(x - offset, y - thicknessOffset, length, size);
-      context.fillRect(x - thicknessOffset, y - offset, size, length);
+      const rotationSelector = hashUnit(settings.seed, index, 0x94d049bb);
+      const rotation = rotationSelector > 0.68 ? DIAGONAL_CROSS_ROTATION : 0;
+      drawCross(context, x, y, size, rotation);
     }
   }
   context.globalAlpha = 1;
@@ -583,7 +611,7 @@ export function TwilightStudio() {
                 <span>
                   <span className="control-label">Soft twinkle</span>
                   <span className="control-hint" id="twinkle-description">
-                    Slowly varies a few stars like atmospheric scintillation.
+                    Varies star brightness with slow atmospheric scintillation.
                   </span>
                 </span>
                 <input

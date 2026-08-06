@@ -61,6 +61,9 @@ test("keeps the renderer, PNG export, and starter cleanup explicit", async () =>
   assert.match(studio, /Soft twinkle/);
   assert.match(studio, /getTwinkleOpacity/);
   assert.match(studio, /horizonInfluence/);
+  assert.match(studio, /DIAGONAL_CROSS_ROTATION/);
+  assert.match(studio, /drawCross/);
+  assert.match(studio, /bright \? 0\.2 : 0\.38/);
   assert.match(studio, /prefers-reduced-motion: reduce/);
   assert.match(css, /\.settings-toggle/);
   assert.match(css, /\.twinkle-switch/);
