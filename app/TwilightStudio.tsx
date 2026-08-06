@@ -106,26 +106,30 @@ function getTwinkleOpacity(
   index: number,
   timeSeconds: number | null,
   bright: boolean,
+  horizonInfluence: number,
 ) {
   if (timeSeconds === null) return 1;
 
   const salt = bright ? 0x6d2b79f5 : 0x1b873593;
   const selector = hashUnit(seed, index, salt);
-  if (selector > (bright ? 0.42 : 0.11)) return 1;
+  const twinkleShare = bright ? 0.78 : 0.28 + horizonInfluence * 0.12;
+  if (selector > twinkleShare) return 1;
 
   // Atmospheric scintillation is irregular rather than a uniform pulse. Two
   // slow deterministic waves keep the sky calm without synchronized stars.
   const phase = hashUnit(seed, index, salt ^ 0x85ebca6b) * Math.PI * 2;
   const secondaryPhase = hashUnit(seed, index, salt ^ 0xc2b2ae35) * Math.PI * 2;
   const cyclesPerSecond =
-    0.14 + hashUnit(seed, index, salt ^ 0x27d4eb2f) * 0.32;
+    0.28 + hashUnit(seed, index, salt ^ 0x27d4eb2f) * 0.72;
   const primary = Math.sin(timeSeconds * cyclesPerSecond * Math.PI * 2 + phase);
   const secondary = Math.sin(
     timeSeconds * cyclesPerSecond * 1.73 * Math.PI * 2 + secondaryPhase,
   );
   const shimmer = primary * 0.68 + secondary * 0.32;
-  const depth = bright ? 0.19 : 0.11;
-  return clamp(1 - depth + shimmer * depth, bright ? 0.62 : 0.78, 1);
+  const normalizedShimmer = (shimmer + 1) / 2;
+  const atmosphericDepth = (bright ? 0.5 : 0.34) *
+    (0.6 + horizonInfluence * 0.4);
+  return 1 - atmosphericDepth + normalizedShimmer * atmosphericDepth;
 }
 
 function getStarColor(
@@ -215,6 +219,7 @@ function drawSky(
       index,
       twinkleTimeSeconds,
       false,
+      1 - yFromBottom / height,
     );
     context.fillRect(x, y, starScale, starScale);
   }
@@ -235,6 +240,7 @@ function drawSky(
       index,
       twinkleTimeSeconds,
       true,
+      1 - yFromBottom / height,
     );
     if (settings.starShape === "diamond") {
       drawDiamond(context, x, y, size);

@@ -167,6 +167,7 @@ a {
   border-left: 2px solid var(--accent);
   border-radius: 8px;
   color: #f5f9fc;
+  color-scheme: dark;
   background: var(--panel);
   box-shadow: 0 22px 70px rgb(0 0 0 / 0.42),
     inset 0 1px rgb(255 255 255 / 0.035);
@@ -332,6 +333,12 @@ a {
 
 .settings-panel select {
   padding: 0 34px 0 10px;
+  color-scheme: dark;
+}
+
+.settings-panel select option {
+  color: #f5f9fc;
+  background: #101a22;
 }
 
 .settings-panel input[type="number"] {

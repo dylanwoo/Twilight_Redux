@@ -60,9 +60,12 @@ test("keeps the renderer, PNG export, and starter cleanup explicit", async () =>
   assert.match(studio, /Diamond · 5K reference/);
   assert.match(studio, /Soft twinkle/);
   assert.match(studio, /getTwinkleOpacity/);
+  assert.match(studio, /horizonInfluence/);
   assert.match(studio, /prefers-reduced-motion: reduce/);
   assert.match(css, /\.settings-toggle/);
   assert.match(css, /\.twinkle-switch/);
+  assert.match(css, /color-scheme:\s*dark/);
+  assert.match(css, /\.settings-panel select option/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(page, /export const metadata:\s*Metadata/);
   assert.match(page, /<TwilightStudio \/>/);
