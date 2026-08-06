@@ -292,6 +292,7 @@ export function TwilightStudio() {
   const [brightStars, setBrightStars] = useState(DEFAULTS.brightStars);
   const [starShape, setStarShape] = useState<StarShape>(DEFAULTS.starShape);
   const [twinkle, setTwinkle] = useState(false);
+  const [showMasthead, setShowMasthead] = useState(true);
   const [seed, setSeed] = useState(DEFAULTS.seed);
   const [sizeId, setSizeId] = useState("4k");
   const [customWidth, setCustomWidth] = useState(1920);
@@ -403,6 +404,7 @@ export function TwilightStudio() {
     setBrightStars(DEFAULTS.brightStars);
     setStarShape(DEFAULTS.starShape);
     setTwinkle(false);
+    setShowMasthead(true);
     setSeed(DEFAULTS.seed);
     setExportStatus("");
   };
@@ -466,13 +468,15 @@ export function TwilightStudio() {
         A procedural twilight sky inspired by the classic SGI IRIX wallpaper.
       </canvas>
 
-      <header className="twilight-masthead" aria-label="Twilight wallpaper studio">
-        <div className="twilight-masthead-line">
-          <span className="twilight-signal" aria-hidden="true" />
-          <span className="twilight-title">TWILIGHT</span>
-        </div>
-        <span className="twilight-kicker">IRIX sky study · deterministic field</span>
-      </header>
+      {showMasthead ? (
+        <header className="twilight-masthead" aria-label="Twilight wallpaper studio">
+          <div className="twilight-masthead-line">
+            <span className="twilight-signal" aria-hidden="true" />
+            <span className="twilight-title">TWILIGHT</span>
+          </div>
+          <span className="twilight-kicker">IRIX sky study · deterministic field</span>
+        </header>
+      ) : null}
 
       {settingsOpen ? (
         <aside
@@ -622,6 +626,22 @@ export function TwilightStudio() {
                   onChange={(event) => setTwinkle(event.target.checked)}
                 />
               </label>
+
+              <label className="twinkle-control">
+                <span>
+                  <span className="control-label">Show upper-left text</span>
+                  <span className="control-hint" id="masthead-description">
+                    Hides the TWILIGHT label for a cleaner live preview.
+                  </span>
+                </span>
+                <input
+                  className="twinkle-switch"
+                  type="checkbox"
+                  checked={showMasthead}
+                  aria-describedby="masthead-description"
+                  onChange={(event) => setShowMasthead(event.target.checked)}
+                />
+              </label>
             </div>
           </section>
 
@@ -680,15 +700,11 @@ export function TwilightStudio() {
 
           <div className="panel-actions">
             <p>
-              References:{" "}
-              <a href="https://github.com/bcaluneo/twilight" target="_blank" rel="noreferrer">
-                bcaluneo/twilight · Brendan Caluneo
-              </a>{" "}
-              and{" "}
-              <a href="https://github.com/joelbraun/twilight" target="_blank" rel="noreferrer">
-                joelbraun/twilight · Joel Braun
+              Repo:{" "}
+              <a href="https://github.com/dylanwoo/Twilight_Redux" target="_blank" rel="noreferrer">
+                dylanwoo/Twilight_Redux
               </a>
-              , both recreating Howard Look&apos;s SGI original.
+              . Inspired by Howard Look&apos;s SGI original.
             </p>
             <button className="reset-button" type="button" onClick={resetSky}>
               Reset
