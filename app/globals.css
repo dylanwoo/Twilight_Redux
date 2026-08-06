@@ -3,7 +3,7 @@
 :root {
   --background: #000000;
   --foreground: #f7fbff;
-  --panel: rgb(3 9 15 / 0.73);
+  --panel: rgb(3 9 15 / 0.64);
   --panel-border: rgb(255 255 255 / 0.2);
   --muted: rgb(227 239 249 / 0.64);
   --accent: #ff5a16;
@@ -71,6 +71,11 @@ a {
   height: 100%;
 }
 
+.twilight-events-canvas {
+  z-index: 1;
+  pointer-events: none;
+}
+
 .twilight-masthead {
   position: fixed;
   top: clamp(18px, 3vw, 34px);
@@ -97,9 +102,26 @@ a {
 }
 
 .twilight-title {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 650;
   letter-spacing: 0.26em;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.twilight-title:hover {
+  color: #fff;
+}
+
+.twilight-title:focus-visible {
+  outline: 1px solid rgb(255 255 255 / 0.72);
+  outline-offset: 5px;
 }
 
 .twilight-kicker {
@@ -172,8 +194,8 @@ a {
   box-shadow: 0 22px 70px rgb(0 0 0 / 0.42),
     inset 0 1px rgb(255 255 255 / 0.035);
   animation: panel-in 150ms ease-out;
-  -webkit-backdrop-filter: blur(7px) saturate(1.08);
-  backdrop-filter: blur(7px) saturate(1.08);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  backdrop-filter: blur(10px) saturate(1.1);
   scrollbar-color: rgb(255 255 255 / 0.3) transparent;
 }
 
@@ -285,6 +307,11 @@ a {
   align-items: center;
 }
 
+.realistic-control {
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+}
+
 .twinkle-switch {
   position: relative;
   width: 38px;
@@ -339,6 +366,11 @@ a {
 .settings-panel select option {
   color: #f5f9fc;
   background: #101a22;
+}
+
+.settings-panel select:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
 }
 
 .settings-panel input[type="number"] {
@@ -440,6 +472,13 @@ a {
 .panel-actions a:hover {
   color: #fff;
   text-decoration-color: var(--accent);
+}
+
+.panel-dedication {
+  display: block;
+  margin-top: 5px;
+  color: rgb(242 228 211 / 0.7);
+  font-style: italic;
 }
 
 .reset-button {
