@@ -548,11 +548,11 @@ export function TwilightStudio() {
             <p>
               References:{" "}
               <a href="https://github.com/bcaluneo/twilight" target="_blank" rel="noreferrer">
-                Brendan Caluneo
+                bcaluneo/twilight · Brendan Caluneo
               </a>{" "}
               and{" "}
               <a href="https://github.com/joelbraun/twilight" target="_blank" rel="noreferrer">
-                Joel Braun
+                joelbraun/twilight · Joel Braun
               </a>
               , both recreating Howard Look&apos;s SGI original.
             </p>
@@ -576,16 +576,6 @@ export function TwilightStudio() {
         </span>
       </button>
 
-      <p className="twilight-credit">
-        References ·{" "}
-        <a href="https://github.com/bcaluneo/twilight" target="_blank" rel="noreferrer">
-          bcaluneo / Brendan Caluneo
-        </a>{" "}
-        ·{" "}
-        <a href="https://github.com/joelbraun/twilight" target="_blank" rel="noreferrer">
-          joelbraun / Joel Braun
-        </a>
-      </p>
     </main>
   );
 }

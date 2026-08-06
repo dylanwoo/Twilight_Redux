@@ -144,8 +144,7 @@ a {
 .settings-toggle:focus-visible,
 .settings-panel button:focus-visible,
 .settings-panel select:focus-visible,
-.settings-panel input:focus-visible,
-.twilight-credit a:focus-visible {
+.settings-panel input:focus-visible {
   outline: 2px solid #ff7a3e;
   outline-offset: 3px;
 }
@@ -374,14 +373,12 @@ a {
   line-height: 1.45;
 }
 
-.panel-actions a,
-.twilight-credit a {
+.panel-actions a {
   text-decoration-color: rgb(255 255 255 / 0.35);
   text-underline-offset: 3px;
 }
 
-.panel-actions a:hover,
-.twilight-credit a:hover {
+.panel-actions a:hover {
   color: #fff;
   text-decoration-color: var(--accent);
 }
@@ -390,20 +387,6 @@ a {
   flex: 0 0 auto;
   height: 31px;
   padding: 0 10px;
-}
-
-.twilight-credit {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 2;
-  margin: 0;
-  color: rgb(255 255 255 / 0.47);
-  font-size: 8px;
-  letter-spacing: 0.025em;
-  line-height: 1.6;
-  text-align: right;
-  text-shadow: 0 1px 10px rgb(0 0 0 / 0.9);
 }
 
 @media (max-width: 620px) {
@@ -426,12 +409,6 @@ a {
     left: 12px;
     width: calc(100vw - 24px);
     max-height: calc(100vh - 84px);
-  }
-
-  .twilight-credit {
-    right: 12px;
-    bottom: 15px;
-    left: 68px;
   }
 }
 

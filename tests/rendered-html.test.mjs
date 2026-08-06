@@ -35,10 +35,7 @@ test("server-renders the Twilight wallpaper studio", async () => {
   assert.match(html, /<canvas/);
   assert.match(html, /TWILIGHT/);
   assert.match(html, /Open settings/);
-  assert.match(html, /bcaluneo\/twilight/);
-  assert.match(html, /joelbraun\/twilight/);
-  assert.match(html, /Brendan Caluneo/);
-  assert.match(html, /Joel Braun/);
+  assert.doesNotMatch(html, /bcaluneo\/twilight|joelbraun\/twilight/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
@@ -57,6 +54,9 @@ test("keeps the renderer, PNG export, and starter cleanup explicit", async () =>
   assert.match(studio, /aria-controls="twilight-settings"/);
   assert.match(studio, /github\.com\/bcaluneo\/twilight/);
   assert.match(studio, /github\.com\/joelbraun\/twilight/);
+  assert.match(studio, /bcaluneo\/twilight · Brendan Caluneo/);
+  assert.match(studio, /joelbraun\/twilight · Joel Braun/);
+  assert.doesNotMatch(studio, /className="twilight-credit"/);
   assert.match(studio, /Diamond · 5K reference/);
   assert.match(css, /\.settings-toggle/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
