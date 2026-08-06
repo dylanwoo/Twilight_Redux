@@ -8,6 +8,8 @@ shaped stars while adding modern high-DPI PNG export.
 Public Sites deployment:
 [sgi-twilight-studio.dylanwoo757047.chatgpt.site](https://sgi-twilight-studio.dylanwoo757047.chatgpt.site)
 
+[![Twilight Redux preview showing the SGI-inspired starfield, wallpaper controls, and Soft Twinkle mode](docs/twilight-preview.jpg)](https://sgi-twilight-studio.dylanwoo757047.chatgpt.site)
+
 ## Features
 
 - Full-screen, responsive canvas preview.
