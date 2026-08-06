@@ -3,7 +3,7 @@
 :root {
   --background: #000000;
   --foreground: #f7fbff;
-  --panel: rgb(4 9 14 / 0.95);
+  --panel: rgb(3 9 15 / 0.73);
   --panel-border: rgb(255 255 255 / 0.2);
   --muted: rgb(227 239 249 / 0.64);
   --accent: #ff5a16;
@@ -168,10 +168,11 @@ a {
   border-radius: 8px;
   color: #f5f9fc;
   background: var(--panel);
-  box-shadow: 0 22px 70px rgb(0 0 0 / 0.56);
+  box-shadow: 0 22px 70px rgb(0 0 0 / 0.42),
+    inset 0 1px rgb(255 255 255 / 0.035);
   animation: panel-in 150ms ease-out;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(7px) saturate(1.08);
+  backdrop-filter: blur(7px) saturate(1.08);
   scrollbar-color: rgb(255 255 255 / 0.3) transparent;
 }
 
@@ -265,6 +266,57 @@ a {
 .control-value {
   color: rgb(255 255 255 / 0.46);
   font-variant-numeric: tabular-nums;
+}
+
+.control-hint {
+  display: block;
+  max-width: 244px;
+  margin-top: 4px;
+  color: rgb(235 245 252 / 0.46);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.twinkle-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.twinkle-switch {
+  position: relative;
+  width: 38px;
+  height: 21px;
+  margin: 0;
+  border: 1px solid rgb(255 255 255 / 0.24);
+  border-radius: 999px;
+  appearance: none;
+  background: rgb(255 255 255 / 0.09);
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.twinkle-switch::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.74);
+  box-shadow: 0 2px 7px rgb(0 0 0 / 0.45);
+  content: "";
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.twinkle-switch:checked {
+  border-color: rgb(255 112 49 / 0.85);
+  background: rgb(255 90 22 / 0.42);
+}
+
+.twinkle-switch:checked::after {
+  background: #fff;
+  transform: translateX(17px);
 }
 
 .settings-panel select,
@@ -418,6 +470,11 @@ a {
   }
 
   .settings-toggle {
+    transition: none;
+  }
+
+  .twinkle-switch,
+  .twinkle-switch::after {
     transition: none;
   }
 }

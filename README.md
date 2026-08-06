@@ -5,7 +5,7 @@ Look's classic 1991 Silicon Graphics IRIX `twilight` background. It recreates
 the original orange-to-blue-to-black sky, deterministic point stars, and larger
 shaped stars while adding modern high-DPI PNG export.
 
-Private Sites deployment:
+Public Sites deployment:
 [sgi-twilight-studio.dylanwoo757047.chatgpt.site](https://sgi-twilight-studio.dylanwoo757047.chatgpt.site)
 
 ## Features
@@ -14,6 +14,7 @@ Private Sites deployment:
 - Authentic SGI palette plus two restrained alternatives.
 - Adjustable horizon, star density, large-star density, and deterministic seed.
 - Original SGI cross stars or high-DPI diamond stars.
+- Optional, reduced-motion-aware atmospheric twinkle preview.
 - Full HD, QHD, ultra-wide, 4K, 5K, and custom PNG export.
 - Export files contain only the rendered wallpaper, never the interface.
 - Keyboard-accessible settings panel opened by the bottom-left gear.

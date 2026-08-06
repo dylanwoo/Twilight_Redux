@@ -51,6 +51,8 @@ type SkySettings = {
 
 type Rgb = { r: number; g: number; b: number };
 
+const TWINKLE_FRAME_INTERVAL = 1000 / 30;
+
 const DEFAULTS = {
   palette: "authentic" as PaletteKey,
   horizon: 20,
@@ -90,6 +92,40 @@ function mulberry32(seed: number) {
     mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
     return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+function hashUnit(seed: number, index: number, salt: number) {
+  let value = (seed ^ Math.imul(index + 1, 0x9e3779b1) ^ salt) >>> 0;
+  value = Math.imul(value ^ (value >>> 16), 0x21f0aaad);
+  value = Math.imul(value ^ (value >>> 15), 0x735a2d97);
+  return ((value ^ (value >>> 15)) >>> 0) / 4294967296;
+}
+
+function getTwinkleOpacity(
+  seed: number,
+  index: number,
+  timeSeconds: number | null,
+  bright: boolean,
+) {
+  if (timeSeconds === null) return 1;
+
+  const salt = bright ? 0x6d2b79f5 : 0x1b873593;
+  const selector = hashUnit(seed, index, salt);
+  if (selector > (bright ? 0.42 : 0.11)) return 1;
+
+  // Atmospheric scintillation is irregular rather than a uniform pulse. Two
+  // slow deterministic waves keep the sky calm without synchronized stars.
+  const phase = hashUnit(seed, index, salt ^ 0x85ebca6b) * Math.PI * 2;
+  const secondaryPhase = hashUnit(seed, index, salt ^ 0xc2b2ae35) * Math.PI * 2;
+  const cyclesPerSecond =
+    0.14 + hashUnit(seed, index, salt ^ 0x27d4eb2f) * 0.32;
+  const primary = Math.sin(timeSeconds * cyclesPerSecond * Math.PI * 2 + phase);
+  const secondary = Math.sin(
+    timeSeconds * cyclesPerSecond * 1.73 * Math.PI * 2 + secondaryPhase,
+  );
+  const shimmer = primary * 0.68 + secondary * 0.32;
+  const depth = bright ? 0.19 : 0.11;
+  return clamp(1 - depth + shimmer * depth, bright ? 0.62 : 0.78, 1);
 }
 
 function getStarColor(
@@ -138,6 +174,7 @@ function drawSky(
   width: number,
   height: number,
   settings: SkySettings,
+  twinkleTimeSeconds: number | null = null,
 ) {
   const transition = clamp(settings.transition, 0.08, 0.38);
   const gradient = context.createLinearGradient(0, 0, 0, height);
@@ -173,6 +210,12 @@ function drawSky(
       settings.palette,
       transition,
     );
+    context.globalAlpha = getTwinkleOpacity(
+      settings.seed,
+      index,
+      twinkleTimeSeconds,
+      false,
+    );
     context.fillRect(x, y, starScale, starScale);
   }
 
@@ -187,6 +230,12 @@ function drawSky(
       settings.palette,
       transition,
     );
+    context.globalAlpha = getTwinkleOpacity(
+      settings.seed,
+      index,
+      twinkleTimeSeconds,
+      true,
+    );
     if (settings.starShape === "diamond") {
       drawDiamond(context, x, y, size);
     } else {
@@ -197,6 +246,7 @@ function drawSky(
       context.fillRect(x - thicknessOffset, y - offset, size, length);
     }
   }
+  context.globalAlpha = 1;
 }
 
 export function TwilightStudio() {
@@ -207,6 +257,7 @@ export function TwilightStudio() {
   const [stars, setStars] = useState(DEFAULTS.stars);
   const [brightStars, setBrightStars] = useState(DEFAULTS.brightStars);
   const [starShape, setStarShape] = useState<StarShape>(DEFAULTS.starShape);
+  const [twinkle, setTwinkle] = useState(false);
   const [seed, setSeed] = useState(DEFAULTS.seed);
   const [sizeId, setSizeId] = useState("4k");
   const [customWidth, setCustomWidth] = useState(1920);
@@ -226,43 +277,75 @@ export function TwilightStudio() {
     [brightStars, horizon, paletteKey, seed, starShape, stars],
   );
 
-  const renderPreview = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const renderPreview = useCallback(
+    (twinkleTimeSeconds: number | null = null) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const width = Math.max(1, Math.round(canvas.clientWidth));
-    const height = Math.max(1, Math.round(canvas.clientHeight));
-    const density = Math.min(window.devicePixelRatio || 1, 2);
-    const pixelWidth = Math.round(width * density);
-    const pixelHeight = Math.round(height * density);
+      const width = Math.max(1, Math.round(canvas.clientWidth));
+      const height = Math.max(1, Math.round(canvas.clientHeight));
+      const density = Math.min(window.devicePixelRatio || 1, 2);
+      const pixelWidth = Math.round(width * density);
+      const pixelHeight = Math.round(height * density);
 
-    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-      canvas.width = pixelWidth;
-      canvas.height = pixelHeight;
-    }
+      if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+        canvas.width = pixelWidth;
+        canvas.height = pixelHeight;
+      }
 
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    context.setTransform(density, 0, 0, density, 0, 0);
-    drawSky(context, width, height, skySettings);
-  }, [skySettings]);
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.setTransform(density, 0, 0, density, 0, 0);
+      drawSky(
+        context,
+        width,
+        height,
+        skySettings,
+        twinkle ? twinkleTimeSeconds : null,
+      );
+    },
+    [skySettings, twinkle],
+  );
 
   useEffect(() => {
-    renderPreview();
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const motionAllowed = !window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const shouldAnimate = twinkle && motionAllowed;
     let animationFrame = 0;
+    let resizeFrame = 0;
+    let lastPaint = -TWINKLE_FRAME_INTERVAL;
+
+    const animate = (timestamp: number) => {
+      if (timestamp - lastPaint >= TWINKLE_FRAME_INTERVAL) {
+        renderPreview(timestamp / 1000);
+        lastPaint = timestamp;
+      }
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    if (shouldAnimate) {
+      animationFrame = requestAnimationFrame(animate);
+    } else {
+      renderPreview();
+    }
+
     const observer = new ResizeObserver(() => {
-      cancelAnimationFrame(animationFrame);
-      animationFrame = requestAnimationFrame(renderPreview);
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame((timestamp) => {
+        renderPreview(shouldAnimate ? timestamp / 1000 : null);
+      });
     });
     observer.observe(canvas);
     return () => {
       cancelAnimationFrame(animationFrame);
+      cancelAnimationFrame(resizeFrame);
       observer.disconnect();
     };
-  }, [renderPreview]);
+  }, [renderPreview, twinkle]);
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -285,6 +368,7 @@ export function TwilightStudio() {
     setStars(DEFAULTS.stars);
     setBrightStars(DEFAULTS.brightStars);
     setStarShape(DEFAULTS.starShape);
+    setTwinkle(false);
     setSeed(DEFAULTS.seed);
     setExportStatus("");
   };
@@ -487,6 +571,22 @@ export function TwilightStudio() {
                     Shuffle
                   </button>
                 </span>
+              </label>
+
+              <label className="twinkle-control">
+                <span>
+                  <span className="control-label">Soft twinkle</span>
+                  <span className="control-hint" id="twinkle-description">
+                    Slowly varies a few stars like atmospheric scintillation.
+                  </span>
+                </span>
+                <input
+                  className="twinkle-switch"
+                  type="checkbox"
+                  checked={twinkle}
+                  aria-describedby="twinkle-description"
+                  onChange={(event) => setTwinkle(event.target.checked)}
+                />
               </label>
             </div>
           </section>
